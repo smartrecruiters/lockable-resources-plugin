@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import hudson.EnvVars;
 import org.jenkins.plugins.lockableresources.queue.LockableResourcesStruct;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
@@ -164,8 +167,29 @@ public class LockStepExecution extends AbstractStepExecutionImpl implements Seri
 
     @Override
     protected void finished(StepContext context) throws Exception {
-      LockableResourcesManager.get()
-          .unlockNames(this.resourceNames, context.get(Run.class), this.inversePrecedence);
+            EnvVars envVars = context.get(EnvVars.class);
+            List<String> devEns = Arrays.asList(
+                    "betest",
+                    "cttest",
+                    "dbtest",
+                    "devops",
+                    "eptest",
+                    "fetest",
+                    "fftest",
+                    "nptest",
+                    "patest",
+                    "sitest",
+                    "tetest",
+                    "xmtest",
+                    "motest",
+                    "zotest"
+            );
+			if (envVars.get("CHANGE_ID") != null && !"DISABLED".equals(envVars.get("ONNODE_DEV_ENV_SPECIAL_LOCK"))) {
+				for (String env : devEns) {
+					if (resourceDescription.startsWith(env)) return;
+				}
+			}
+            LockableResourcesManager.get().unlockNames(this.resourceNames, context.get(Run.class), this.inversePrecedence);
       context
           .get(TaskListener.class)
           .getLogger()
