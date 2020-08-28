@@ -188,6 +188,7 @@ public class LockStepExecution extends AbstractStepExecutionImpl implements Seri
 				for (String env : devEns) {
 					if (resourceDescription.startsWith(env)) return;
 				}
+				if (resourceDescription.contains("dev-") || resourceDescription.endsWith("dev")) return;
 			}
             LockableResourcesManager.get().unlockNames(this.resourceNames, context.get(Run.class), this.inversePrecedence);
       context
